@@ -3,7 +3,7 @@
 面向运营商 IPTV 客服场景：对工单文本做自动分类（故障大类），并基于分类结果做自动分流（映射到分配部门/队列），降低人工初筛成本。
 
 ## 1. 环境要求
-- Python 3.6+（如需 Python2.7 兼容版可再改）
+- Python 3.6+
 - 依赖见 requirements.txt（scikit-learn 0.20.x、Flask 1.1.x、jieba）
 
 ## 2. 数据
