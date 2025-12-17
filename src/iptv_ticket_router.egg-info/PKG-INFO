@@ -1,9 +1,34 @@
-# IPTV 工单自动分类与分流
+Metadata-Version: 2.4
+Name: iptv-ticket-router
+Version: 1.0.0
+Summary: IPTV customer-service ticket classification and auto-routing service (carrier-grade)
+Author-email: Your Company <support@example.com>
+License: Apache-2.0
+Keywords: iptv,ticket,routing,nlp,fastapi
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: fastapi>=0.110
+Requires-Dist: uvicorn[standard]>=0.27
+Requires-Dist: gunicorn>=21.2
+Requires-Dist: pydantic>=2.6
+Requires-Dist: pyyaml>=6.0.1
+Requires-Dist: scikit-learn>=1.4
+Requires-Dist: joblib>=1.3
+Requires-Dist: jieba>=0.42.1
+Requires-Dist: prometheus-client>=0.20.0
+Requires-Dist: python-json-logger>=2.0.7
+Provides-Extra: train
+Requires-Dist: pandas>=2.1; extra == "train"
+Provides-Extra: test
+Requires-Dist: pytest>=8.0; extra == "test"
+Requires-Dist: httpx>=0.27; extra == "test"
+
+# IPTV 工单自动分类与分流（2025 工程化可交付版本）
 
 面向运营商 IPTV 客服场景：对工单文本做**自动分类（故障大类）**，并基于分类结果做**自动分流（映射到分配部门/队列）**，降低人工初筛成本。
 
 本项目提供：
-- 训练：`scripts/train.py`
+- 训练：`scripts/train.py`（可用你们的数据重新训练并生成映射）
 - 在线：FastAPI 服务（/predict、/healthz、/metrics）
 - 运维：结构化日志、Prometheus 指标、Docker 生产部署模板
 
@@ -84,4 +109,12 @@ docker run --rm -p 8080:8080 -e IPTV_CONFIG=/app/configs/config.yaml iptv-ticket
 你们最常改的是：
 - `routing.route_map_file` / `routing.dept_to_queue`：部门/队列映射
 - `model.threshold_auto_route`：自动分流阈值
+
+---
+
+## 4) 交付建议（运营商环境）
+
+- 将 `models/` 作为制品仓库（Model Registry）落盘管理：包含 joblib、label/route 映射、`model_meta.json`
+- 在灰度期把 `auto_routed=false` 的样本回流到标注队列，用于二次训练与映射校准
+- 队列映射建议**按地市/区域拆分**（route_map 可支持多租户/多地域配置）
 

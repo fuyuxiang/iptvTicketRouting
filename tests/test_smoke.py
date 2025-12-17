@@ -1,26 +1,36 @@
-# -*- coding: utf-8 -*-
 import os
-import json
-import unittest
+from pathlib import Path
 
-from api.app import create_app
+from fastapi.testclient import TestClient
 
-class SmokeTest(unittest.TestCase):
-    def setUp(self):
-        os.environ["IPTV_CONFIG"] = "configs/config.yaml"
-        self.app = create_app("configs/config.yaml").test_client()
+from iptv_ticket_router.api import create_app
 
-    def test_healthz(self):
-        r = self.app.get("/healthz")
-        self.assertEqual(r.status_code, 200)
 
-    def test_predict(self):
-        payload = {"ticket_id": "T1", "text": "机顶盒提示无信号，无法播放"}
-        r = self.app.post("/predict", data=json.dumps(payload), content_type="application/json")
-        self.assertEqual(r.status_code, 200)
-        data = r.get_json()
-        self.assertIn("label", data)
-        self.assertIn("queue", data)
+def ensure_model(tmp_path: Path):
+    # Train a tiny model quickly using included sample data
+    import subprocess
 
-if __name__ == "__main__":
-    unittest.main()
+    root = Path(__file__).resolve().parents[1]
+    cfg = root / "configs" / "config.yaml"
+    # ensure model dir exists in working dir
+    subprocess.check_call(["python", "scripts/train.py", "--config", str(cfg)], cwd=str(root))
+
+
+def test_healthz_and_predict():
+    root = Path(__file__).resolve().parents[1]
+    cfg = root / "configs" / "config.yaml"
+    ensure_model(root / "models")
+
+    os.environ["IPTV_CONFIG"] = str(cfg)
+    app = create_app(str(cfg))
+    client = TestClient(app)
+
+    r = client.get("/healthz")
+    assert r.status_code == 200
+
+    r = client.post("/predict", json={"ticket_id": "T1", "text": "机顶盒无信号，提示网络异常"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["ticket_id"] == "T1"
+    assert "label" in body
+    assert "queue" in body

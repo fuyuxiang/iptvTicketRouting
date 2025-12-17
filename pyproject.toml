@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "iptv-ticket-router"
+version = "1.0.0"
+description = "IPTV customer-service ticket classification and auto-routing service (carrier-grade)"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name="Your Company", email="support@example.com"}]
+license = {text = "Apache-2.0"}
+keywords = ["iptv", "ticket", "routing", "nlp", "fastapi"]
+
+dependencies = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "gunicorn>=21.2",
+  "pydantic>=2.6",
+  "pyyaml>=6.0.1",
+  "scikit-learn>=1.4",
+  "joblib>=1.3",
+  "jieba>=0.42.1",
+  "prometheus-client>=0.20.0",
+  "python-json-logger>=2.0.7",
+]
+
+[project.optional-dependencies]
+train = [
+  "pandas>=2.1",
+]
+test = [
+  "pytest>=8.0",
+  "httpx>=0.27",
+]
+
+[project.scripts]
+iptv-ticket-router = "iptv_ticket_router.cli:main"
+
+[tool.pytest.ini_options]
+addopts = "-q"

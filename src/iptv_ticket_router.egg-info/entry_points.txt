@@ -1,0 +1,2 @@
+[console_scripts]
+iptv-ticket-router = iptv_ticket_router.cli:main
